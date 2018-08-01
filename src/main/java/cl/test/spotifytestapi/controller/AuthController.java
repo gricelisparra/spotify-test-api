@@ -1,11 +1,11 @@
 package cl.test.spotifytestapi.controller;
 
-import java.util.HashMap;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,13 +27,14 @@ public class AuthController {
 	public Object getAccessToken() {
 		
     	HttpHeaders headers = new HttpHeaders();
-    	headers.setContentType(MediaType.APPLICATION_JSON);
-    	headers.set("Authorization", credentials);      
-
-    	HashMap<String, String> hash = new HashMap<String, String>();
-    	hash.put("grant_type", "client_credentials");
+    	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    	headers.set("Authorization", credentials);
     	
-    	HttpEntity<HashMap<String, String>> request = new HttpEntity<HashMap<String, String>>(hash, headers);
+    	MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<>();
+    	parametersMap.add("username", "test");
+    	
+    	HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+    			parametersMap, headers);
     	
     	RestTemplate restTemplate = new RestTemplate();
     	Object response = restTemplate.postForObject(authURL, request, Object.class);
