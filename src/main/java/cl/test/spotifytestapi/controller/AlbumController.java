@@ -1,13 +1,7 @@
 package cl.test.spotifytestapi.controller;
 
-import java.util.Collections;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,19 +10,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import cl.test.spotifytestapi.domain.AlbumPageWrapper;
+import cl.test.spotifytestapi.service.AlbumService;
+import cl.test.spotifytestapi.service.AuthService;
 
 @RestController
 @RequestMapping("/album")
 public class AlbumController {
 	
-	@Value("${spotify.access_token}")
-	private String accessToken;
+	@Autowired
+	private AuthService authService;
 	
-	@Value("${spotify.base.url}")
-	private String baseURL;
+	@Autowired
+	private AlbumService albumService;
     
     @ResponseBody
     @RequestMapping(value = "/search", method = RequestMethod.GET)
@@ -38,22 +33,10 @@ public class AlbumController {
     	ResponseEntity<AlbumPageWrapper> response = null;
     	
     	try {
-	    	HttpHeaders headers = new HttpHeaders();
-	    	headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-	    	headers.setContentType(MediaType.APPLICATION_JSON);
-	    	headers.set("Authorization", "Bearer " + accessToken);
-	    	
-	    	HttpEntity<String> entity = new HttpEntity<String>(headers);
-	    	 
-	    	RestTemplate restTemplate = new RestTemplate();
-	    	response = restTemplate.exchange(
-				baseURL + "/search?type=album&q=album:" + albumName + (artistName != null ? " artist:" + artistName : ""),
-				HttpMethod.GET,
-				entity,
-				AlbumPageWrapper.class
-			);
+    		response = albumService.searchAlbums(authService.getAccessToken(), albumName, artistName);
     	} catch (HttpClientErrorException e) {
-    		e.printStackTrace(); // TODO: Cambiar a log
+    		// TODO: Cambiar a log...
+    		System.out.println("Ocurrio un error en la busqueda de albums " + e.getClass() + ": " + e.getMessage());
     		return new ResponseEntity<AlbumPageWrapper>(e.getStatusCode());
     	}
 		
