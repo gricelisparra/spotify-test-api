@@ -2,6 +2,7 @@ package cl.test.spotifytestapi.service;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,13 +13,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import cl.test.spotifytestapi.domain.AlbumPageWrapper;
+import cl.test.spotifytestapi.repository.AlbumRepository;
 
 @Service
 public class AlbumService {
 	
+	@Autowired
+	private AlbumRepository albumRepository;
+	
 	@Value("${spotify.base.url}")
 	private String baseURL;
-	
+
 	public ResponseEntity<AlbumPageWrapper> searchAlbums(String accessToken, String albumName, String artistName){
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -35,6 +40,8 @@ public class AlbumService {
 			entity,
 			AlbumPageWrapper.class
 		);
+    	
+    	albumRepository.save(response.getBody().getAlbums());
     	
     	return response;
 	}
